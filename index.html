@@ -1,163 +1,92 @@
 <!DOCTYPE html>
-<html lang="ar">
+<html lang="ar" dir="rtl">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>JumpCat Gold - Play & Earn</title>
+    <title>Jump Cat - Play & Earn</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
-    <script src="https://sad.adsgram.ai/js/adsgram-ad-sdk.js"></script>
+    <script src="https://adsgram.ai/js/adsgram-ad-sdk.js"></script>
     <style>
-        body {
-            margin: 0; padding: 0; font-family: 'Arial', sans-serif;
-            background: linear-gradient(180deg, #1a1a2e 0%, #16213e 100%);
-            color: white; overflow: hidden; display: flex; flex-direction: column; align-items: center; height: 100vh;
-            user-select: none; -webkit-user-select: none;
-        }
-        .header { margin-top: 20px; text-align: center; width: 100%; }
-        #score { font-size: 45px; font-weight: bold; color: #f7d018; text-shadow: 0 0 15px rgba(247, 208, 24, 0.6); margin-bottom: 5px; }
-        .energy-bar-container {
-            width: 70%; height: 15px; background: #333; border-radius: 10px; margin: 10px auto; border: 1px solid #555; overflow: hidden;
-        }
-        #energy-fill {
-            width: 100%; height: 100%; background: linear-gradient(90deg, #ffe600, #ff9900);
-            border-radius: 8px; transition: width 0.3s;
-        }
-        .game-area {
-            flex-grow: 1; display: flex; justify-content: center; align-items: center; width: 100%; position: relative;
-        }
-        #cat {
-            width: 220px; cursor: pointer; transition: transform 0.1s;
-        }
-        #cat:active { transform: scale(0.92); }
-        .footer {
-            width: 100%; display: flex; justify-content: space-around; padding: 25px 0; background: rgba(0,0,0,0.4);
-            border-top: 1px solid rgba(255,255,255,0.1);
-        }
-        .btn {
-            background: linear-gradient(135deg, #4e4eef, #3a3ad1); border: none; padding: 12px 18px; 
-            border-radius: 12px; color: white; font-weight: bold; font-size: 14px; box-shadow: 0 4px 10px rgba(0,0,0,0.3);
-        }
-        /* Floating Text Style */
-        .float-text {
-            position: absolute; color: #f7d018; font-weight: bold; pointer-events: none; font-size: 24px;
-            animation: moveUp 0.6s ease-out forwards;
-        }
-        @keyframes moveUp {
-            0% { transform: translateY(0); opacity: 1; }
-            100% { transform: translateY(-120px); opacity: 0; }
-        }
+        body { font-family: 'Arial', sans-serif; background: #1a1a2e; color: white; text-align: center; margin: 0; padding: 0; overflow: hidden; }
+        .header { padding: 20px; background: #16213e; border-bottom: 2px solid #f7d018; }
+        .balance-box { font-size: 28px; font-weight: bold; color: #f7d018; }
+        .energy-bar { margin: 10px auto; width: 80%; background: #333; height: 10px; border-radius: 5px; overflow: hidden; }
+        #energy-fill { width: 100%; height: 100%; background: #f7d018; transition: width 0.3s; }
+        .game-area { height: 50vh; display: flex; flex-direction: column; justify-content: center; align-items: center; }
+        .cat-img { width: 180px; cursor: pointer; transition: transform 0.1s; }
+        .cat-img:active { transform: scale(0.9); }
+        .footer { position: fixed; bottom: 20px; width: 100%; display: flex; justify-content: space-around; }
+        .btn { padding: 15px 25px; border-radius: 12px; border: none; font-weight: bold; font-size: 16px; cursor: pointer; color: white; }
+        .btn-ad { background: linear-gradient(90deg, #4e54c8, #8f94fb); box-shadow: 0 4px 15px rgba(78, 84, 200, 0.4); }
+        .btn-gray { background: #444; cursor: not-allowed; }
     </style>
 </head>
-<body> 
+<body>
 
     <div class="header">
-        <div id="score">0</div>
-        <div style="font-size: 14px; opacity: 0.8;">عملة القطة الذهبية</div>
-        <div class="energy-bar-container">
-            <div id="energy-fill"></div>
-        </div>
-        <div id="energy-text" style="font-size: 12px;">⚡ 1000 / 1000</div>
-    </div> 
+        <div class="balance-box">💰 <span id="points">0</span></div>
+        <div class="energy-text">الطاقة: <span id="energy">100</span>/100</div>
+        <div class="energy-bar"><div id="energy-fill"></div></div>
+    </div>
 
-    <div class="game-area" id="click-zone">
-        <img id="cat" src="https://img.icons8.com/bubbles/200/cat.png" alt="Jump Cat">
-    </div> 
+    <div class="game-area">
+        <img src="https://img.icons8.com/clouds/200/cat.png" class="cat-img" onclick="handleTap()">
+        <p>انقر على القطة لجمع العملات!</p>
+    </div>
 
     <div class="footer">
-        <button class="btn" onclick="showAd()">📺 ربح سريع</button>
-        <button class="btn" onclick="showTasks()">📋 المهام</button>
-        <button class="btn" onclick="withdraw()">💰 سحب</button>
-    </div> 
+        <button id="adBtn" class="btn btn-ad" onclick="loadAd()">📺 ربح سريع (100+ 💰)</button>
+    </div>
 
     <script>
-        let tg = window.Telegram.WebApp;
-        tg.expand();
+        let score = 0;
+        let energy = 100;
+        const maxEnergy = 100;
 
-        // استرجاع البيانات المحفوظة أو البدء من الصفر
-        let points = parseInt(localStorage.getItem('catPoints')) || 0;
-        let energy = parseInt(localStorage.getItem('catEnergy')) || 1000;
-        const maxEnergy = 1000;
+        // تفعيل نظام الأرباح برقمك الخاص 20473
+        const AdController = window.Adsgram.init({ blockId: "20473" });
 
-        const scoreEl = document.getElementById('score');
-        const energyFill = document.getElementById('energy-fill');
-        const energyText = document.getElementById('energy-text');
-        const cat = document.getElementById('cat');
-
-        updateUI();
-
-        // نظام النقر والمكافأة
-        cat.addEventListener('touchstart', (e) => {
-            e.preventDefault(); // منع الزووم في الموبايل
-            if (energy >= 2) {
-                points += 1;
-                energy -= 2;
-                saveData();
+        function handleTap() {
+            if (energy > 0) {
+                score += 1;
+                energy -= 1;
                 updateUI();
-                
-                const touch = e.touches[0];
-                showFloatingText(touch.clientX, touch.clientY);
-                vibrate();
+            } else {
+                alert("نفدت الطاقة! شاهد إعلاناً للشحن فوراً.");
             }
-        });
+        }
 
         function updateUI() {
-            scoreEl.innerText = points.toLocaleString();
-            const energyPercent = (energy / maxEnergy) * 100;
-            energyFill.style.width = energyPercent + "%";
-            energyText.innerText = `⚡ ${energy} / ${maxEnergy}`;
+            document.getElementById('points').innerText = score;
+            document.getElementById('energy').innerText = energy;
+            document.getElementById('energy-fill').style.width = (energy / maxEnergy * 100) + "%";
         }
 
-        function saveData() {
-            localStorage.setItem('catPoints', points);
-            localStorage.setItem('catEnergy', energy);
-        }
+        async function loadAd() {
+            const btn = document.getElementById('adBtn');
+            btn.disabled = true;
+            btn.innerText = "جاري التحميل...";
 
-        // استعادة الطاقة تلقائياً (1 طاقة كل ثانية)
-        setInterval(() => {
-            if (energy < maxEnergy) {
-                energy += 1;
-                saveData();
-                updateUI();
-            }
-        }, 1000);
-
-        function showFloatingText(x, y) {
-            const text = document.createElement('div');
-            text.className = 'float-text';
-            text.innerText = "+1";
-            text.style.left = (x - 10) + 'px';
-            text.style.top = (y - 40) + 'px';
-            document.body.appendChild(text);
-            setTimeout(() => text.remove(), 600);
-        }
-
-        function vibrate() {
-            if (tg.HapticFeedback) {
-                tg.HapticFeedback.impactOccurred('light');
-            }
-        }
-
-        // --- نظام الإعلانات AdsGram ---
-        // استبدل 'YOUR_BLOCK_ID' بالمعرف الذي ستحصل عليه من موقع Adsgram.ai
-        const AdController = window.Adsgram ? window.Adsgram.init({ blockId: "20473" }) : null;
-
-        function showAd() {
-            if (AdController) {
-                AdController.show().then((result) => {
-                    points += 1000; // مكافأة مشاهدة الإعلان
-                    saveData();
+            try {
+                await AdController.show().then((result) => {
+                    // المستخدم شاهد الإعلان كاملاً
+                    score += 100;
+                    energy = 100;
                     updateUI();
-                    alert("مبروك! ربحت 1000 نقطة إضافية.");
-                }).catch((result) => {
-                    alert("الإعلان غير جاهز حالياً، حاول لاحقاً.");
+                    alert("مبروك! حصلت على مكافأة 100 عملة وشحن كامل للطاقة.");
                 });
-            } else {
-                alert("نظام الأرباح سيتم تفعيله فور ربط الـ Block ID");
+            } catch (error) {
+                // فشل تحميل الإعلان أو قام المستخدم بإغلاقه
+                alert("لا يوجد إعلان متاح الآن، حاول مرة أخرى بعد قليل.");
+            } finally {
+                btn.disabled = false;
+                btn.innerText = "📺 ربح سريع (100+ 💰)";
             }
         }
 
-        function showTasks() { alert("قريباً: تابع قناتنا لتربح 5000 نقطة!"); }
-        function withdraw() { alert("الحد الأدنى للسحب هو 100,000 نقطة."); }
+        // إشعار تلجرام أن التطبيق جاهز
+        window.Telegram.WebApp.ready();
+        window.Telegram.WebApp.expand();
     </script>
 </body>
 </html>
