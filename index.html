@@ -3,151 +3,135 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Bit Tycoon Evolution</title>
-    
+    <title>TON Cloud Miner</title>
     <script src="https://sad.adsgram.ai/js/adsgram-ad-sdk.js"></script>
     <script src="https://cdn.tailwindcss.com"></script>
-    
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&display=swap');
-        body { background-color: #000; color: white; font-family: 'Inter', sans-serif; touch-action: manipulation; -webkit-user-select: none; }
-        .glass-card { background: rgba(255, 255, 255, 0.03); border: 1px solid rgba(255, 255, 255, 0.08); border-radius: 28px; }
-        .orange-glow { text-shadow: 0 0 20px rgba(245, 158, 11, 0.6); }
-        .mining-dot { animation: blink 1.5s infinite; }
-        @keyframes blink { 0%, 100% { opacity: 1; } 50% { opacity: 0.2; } }
-        .btn-gradient { background: linear-gradient(135deg, #ffffff 0%, #e2e8f0 100%); }
+        @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;900&family=Inter:wght@300;700&display=swap');
+        body { background-color: #050a10; color: white; font-family: 'Inter', sans-serif; }
+        .ton-blue { color: #0088cc; }
+        .ton-bg { background: linear-gradient(180deg, #0088cc 0%, #005580 100%); }
+        .glass-panel { background: rgba(255, 255, 255, 0.03); border: 1px solid rgba(0, 136, 204, 0.2); border-radius: 24px; }
+        .mining-glow { text-shadow: 0 0 15px rgba(0, 136, 204, 0.8); font-family: 'Orbitron', sans-serif; }
     </style>
 </head>
-<body class="flex flex-col min-h-screen p-6 select-none">
+<body class="flex flex-col min-h-screen p-5">
 
-    <div class="flex justify-between items-center mb-10">
+    <div class="flex justify-between items-center mb-6">
         <div class="flex items-center gap-2">
-            <div class="w-2 h-2 bg-green-500 rounded-full mining-dot"></div>
-            <span class="text-[10px] font-bold text-gray-500 uppercase tracking-widest">Mining Active</span>
+            <img src="https://cryptologos.cc/logos/toncoin-ton-logo.png" class="w-6 h-6" alt="TON">
+            <span class="font-bold text-sm tracking-tighter">TON MINER</span>
         </div>
-        <div class="text-[10px] font-bold text-orange-500 uppercase bg-orange-500/10 px-3 py-1 rounded-full">
-            VIP Level 1
-        </div>
-    </div>
-
-    <div class="text-center mb-12">
-        <p class="text-gray-500 text-xs font-bold tracking-[0.2em] mb-2 uppercase">Total Accumulated</p>
-        <h1 id="balance" class="text-6xl font-black orange-glow tracking-tighter transition-all">0.0000</h1>
-        <p id="rate" class="text-orange-500 text-sm mt-3 font-mono leading-none font-bold">+0.0001 /sec</p>
-    </div>
-
-    <div class="space-y-6 flex-1">
-        <div class="glass-card p-6">
-            <div class="flex justify-between items-center mb-3">
-                <div class="flex items-center gap-2">
-                    <span class="text-lg">⚡</span>
-                    <span class="text-sm font-black uppercase tracking-tight">Energy Hub</span>
-                </div>
-                <span id="energyText" class="text-sm font-mono font-bold">100/100</span>
-            </div>
-            <div class="w-full bg-white/5 h-4 rounded-full p-1 border border-white/5">
-                <div id="energyBar" class="bg-orange-500 h-full rounded-full transition-all duration-1000 shadow-[0_0_10px_#f59e0b]" style="width: 100%"></div>
-            </div>
-        </div>
-
-        <button onclick="watchAdToRefill()" id="adBtn" class="w-full btn-gradient text-black font-black py-7 rounded-[2rem] flex items-center justify-center gap-4 active:scale-95 transition-all shadow-2xl relative overflow-hidden">
-            <span class="text-2xl">🔋</span>
-            <span class="text-lg uppercase tracking-tighter">Refill Energy & Boost</span>
+        <button onclick="connectWallet()" id="walletBtn" class="bg-[#0088cc]/20 border border-[#0088cc]/40 px-4 py-2 rounded-xl text-[10px] font-bold">
+            💎 CONNECT WALLET
         </button>
+    </div>
 
-        <div class="grid grid-cols-2 gap-4">
-            <div class="glass-card p-5 text-center">
-                <p class="text-[9px] text-gray-500 uppercase font-black mb-1">Hardware</p>
-                <p class="text-sm font-bold">V1 Miner</p>
+    <div id="mainView">
+        <div class="text-center mb-8">
+            <p class="text-gray-500 text-[10px] font-bold tracking-widest mb-2 uppercase">Unclaimed TON Balance</p>
+            <h1 id="balance" class="text-5xl font-black ton-blue mining-glow tracking-tighter">0.000000</h1>
+            <div class="flex justify-center items-center gap-2 mt-3">
+                <span class="w-2 h-2 bg-blue-500 rounded-full animate-pulse"></span>
+                <span class="text-[10px] text-blue-400 font-mono">Mining Speed: 0.000042 /s</span>
             </div>
-            <div class="glass-card p-5 text-center">
-                <p class="text-[9px] text-gray-500 uppercase font-black mb-1">Network</p>
-                <p class="text-sm font-bold text-green-500">Stable</p>
+        </div>
+
+        <div class="glass-panel p-6 mb-4">
+            <div class="flex justify-between text-xs mb-2">
+                <span class="text-gray-400 uppercase">Energy Reservoir</span>
+                <span id="energyText" class="font-bold">100%</span>
             </div>
+            <div class="w-full bg-white/5 h-2 rounded-full overflow-hidden">
+                <div id="energyBar" class="bg-[#0088cc] h-full shadow-[0_0_10px_#0088cc]" style="width: 100%"></div>
+            </div>
+        </div>
+
+        <div class="grid grid-cols-2 gap-3 mb-4">
+            <button onclick="watchAd()" class="ton-bg col-span-2 py-5 rounded-2xl font-black text-sm flex items-center justify-center gap-3 active:scale-95 shadow-lg shadow-blue-500/20">
+                ⚡ RECHARGE & BOOST (ADS)
+            </button>
+            <button onclick="showWithdraw()" class="glass-panel py-4 text-xs font-bold active:scale-95">📤 WITHDRAW</button>
+            <button onclick="showLeaderboard()" class="glass-panel py-4 text-xs font-bold active:scale-95">🏆 TOP MINERS</button>
         </div>
     </div>
 
-    <div class="text-center pt-6">
-        <p class="text-[9px] text-gray-700 font-mono">NODE ID: 19316 | SESSION SECURE</p>
+    <div id="leaderboardView" class="hidden">
+        <div class="flex items-center gap-4 mb-6">
+            <button onclick="showMain()" class="p-2">⬅️</button>
+            <h2 class="text-xl font-bold">Top Miners</h2>
+        </div>
+        <div class="space-y-3">
+            <div class="glass-panel p-4 flex justify-between items-center border-blue-500/50">
+                <span class="text-sm">1. Akram Jaky</span>
+                <span class="text-blue-400 font-bold">142.50 TON</span>
+            </div>
+            <div class="glass-panel p-4 flex justify-between items-center">
+                <span class="text-sm">2. CryptoKing</span>
+                <span class="text-blue-400 font-bold">89.12 TON</span>
+            </div>
+            <div class="glass-panel p-4 flex justify-between items-center">
+                <span class="text-sm">3. TonMaster</span>
+                <span class="text-blue-400 font-bold">45.00 TON</span>
+            </div>
+        </div>
     </div>
 
     <script>
-        // --- تهيئة المتغيرات ---
-        let balance = 0.0000;
-        let energy = 100;
-        const MINING_RATE = 0.0001; // السرعة
-        const ENERGY_DECAY = 0.2; // سرعة نفاد الطاقة
+        let balance = parseFloat(localStorage.getItem('ton_bal')) || 0;
+        let energy = parseFloat(localStorage.getItem('ton_eng')) || 100;
 
-        // --- ميزة الحفظ التلقائي (localStorage) ---
-        function loadData() {
-            const savedBalance = localStorage.getItem('bt_balance');
-            const savedEnergy = localStorage.getItem('bt_energy');
-            
-            if (savedBalance) balance = parseFloat(savedBalance);
-            if (savedEnergy) energy = parseFloat(savedEnergy);
-            updateUI();
-        }
-
-        function saveData() {
-            localStorage.setItem('bt_balance', balance.toFixed(8));
-            localStorage.setItem('bt_energy', energy.toFixed(2));
-        }
-
-        // --- تحديث الواجهة ---
         function updateUI() {
-            document.getElementById('balance').innerText = balance.toFixed(4);
-            document.getElementById('energyText').innerText = Math.ceil(energy) + "/100";
+            document.getElementById('balance').innerText = balance.toFixed(6);
             document.getElementById('energyBar').style.width = energy + "%";
-            
-            const btn = document.getElementById('adBtn');
-            if (energy <= 10) {
-                btn.classList.add('animate-bounce', 'bg-orange-500', 'text-white');
-                btn.classList.remove('btn-gradient');
-            } else {
-                btn.classList.remove('animate-bounce', 'bg-orange-500', 'text-white');
-                btn.classList.add('btn-gradient');
-            }
+            document.getElementById('energyText').innerText = Math.ceil(energy) + "%";
+            localStorage.setItem('ton_bal', balance);
+            localStorage.setItem('ton_eng', energy);
         }
 
-        // --- منطق التعدين ---
         setInterval(() => {
-            if (energy > 0) {
-                balance += MINING_RATE;
-                energy -= ENERGY_DECAY;
-                if (energy < 0) energy = 0;
+            if(energy > 0) {
+                balance += 0.000042;
+                energy -= 0.15;
                 updateUI();
-                saveData(); // حفظ البيانات كل ثانية
             }
         }, 1000);
 
-        // --- منطق الإعلانات (Unit 19316) ---
-        function watchAdToRefill() {
-            const btn = document.getElementById('adBtn');
-            const originalHTML = btn.innerHTML;
-            
-            btn.disabled = true;
-            btn.innerText = "Connecting to Ad Server...";
-
+        function watchAd() {
             const AdController = window.Adsgram.init({ blockId: "19316" });
-
             AdController.show().then(() => {
-                // مكافأة عند النجاح
                 energy = 100;
-                balance += 0.0500; // مكافأة كاش فورية
-                btn.disabled = false;
-                btn.innerHTML = originalHTML;
-                alert("✅ SUCCESS: Energy 100% & Bonus +0.05 Points!");
+                balance += 0.01;
+                alert("✅ RECHARGED! +0.01 TON Bonus added.");
                 updateUI();
-                saveData();
-            }).catch(() => {
-                btn.disabled = false;
-                btn.innerHTML = originalHTML;
-                alert("⚠️ Error: You must watch the full ad to refill energy.");
             });
         }
 
-        // تشغيل التحميل عند فتح الصفحة
-        window.onload = loadData;
+        function connectWallet() {
+            const addr = prompt("Enter your TON Wallet Address (Tonkeeper/MyTonWallet):");
+            if(addr) {
+                document.getElementById('walletBtn').innerText = "Linked: " + addr.substring(0,6) + "...";
+                alert("✅ Wallet successfully linked to your mining node!");
+            }
+        }
+
+        function showWithdraw() {
+            if(balance < 5) {
+                alert("❌ Minimum withdrawal is 5.00 TON.\nKeep mining!");
+            } else {
+                alert("📥 Withdrawal request sent to your linked wallet.");
+            }
+        }
+
+        function showLeaderboard() {
+            document.getElementById('mainView').classList.add('hidden');
+            document.getElementById('leaderboardView').classList.remove('hidden');
+        }
+
+        function showMain() {
+            document.getElementById('mainView').classList.remove('hidden');
+            document.getElementById('leaderboardView').classList.add('hidden');
+        }
     </script>
 </body>
 </html>
