@@ -3,90 +3,151 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Jump Cat - Play & Earn</title>
-    <script src="https://telegram.org/js/telegram-web-app.js"></script>
-    <script src="https://adsgram.ai/js/adsgram-ad-sdk.js"></script>
+    <title>Bit Tycoon Evolution</title>
+    
+    <script src="https://sad.adsgram.ai/js/adsgram-ad-sdk.js"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    
     <style>
-        body { font-family: 'Arial', sans-serif; background: #1a1a2e; color: white; text-align: center; margin: 0; padding: 0; overflow: hidden; }
-        .header { padding: 20px; background: #16213e; border-bottom: 2px solid #f7d018; }
-        .balance-box { font-size: 28px; font-weight: bold; color: #f7d018; }
-        .energy-bar { margin: 10px auto; width: 80%; background: #333; height: 10px; border-radius: 5px; overflow: hidden; }
-        #energy-fill { width: 100%; height: 100%; background: #f7d018; transition: width 0.3s; }
-        .game-area { height: 50vh; display: flex; flex-direction: column; justify-content: center; align-items: center; }
-        .cat-img { width: 180px; cursor: pointer; transition: transform 0.1s; }
-        .cat-img:active { transform: scale(0.9); }
-        .footer { position: fixed; bottom: 20px; width: 100%; display: flex; justify-content: space-around; }
-        .btn { padding: 15px 25px; border-radius: 12px; border: none; font-weight: bold; font-size: 16px; cursor: pointer; color: white; }
-        .btn-ad { background: linear-gradient(90deg, #4e54c8, #8f94fb); box-shadow: 0 4px 15px rgba(78, 84, 200, 0.4); }
-        .btn-gray { background: #444; cursor: not-allowed; }
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&display=swap');
+        body { background-color: #000; color: white; font-family: 'Inter', sans-serif; touch-action: manipulation; -webkit-user-select: none; }
+        .glass-card { background: rgba(255, 255, 255, 0.03); border: 1px solid rgba(255, 255, 255, 0.08); border-radius: 28px; }
+        .orange-glow { text-shadow: 0 0 20px rgba(245, 158, 11, 0.6); }
+        .mining-dot { animation: blink 1.5s infinite; }
+        @keyframes blink { 0%, 100% { opacity: 1; } 50% { opacity: 0.2; } }
+        .btn-gradient { background: linear-gradient(135deg, #ffffff 0%, #e2e8f0 100%); }
     </style>
 </head>
-<body>
+<body class="flex flex-col min-h-screen p-6 select-none">
 
-    <div class="header">
-        <div class="balance-box">💰 <span id="points">0</span></div>
-        <div class="energy-text">الطاقة: <span id="energy">100</span>/100</div>
-        <div class="energy-bar"><div id="energy-fill"></div></div>
+    <div class="flex justify-between items-center mb-10">
+        <div class="flex items-center gap-2">
+            <div class="w-2 h-2 bg-green-500 rounded-full mining-dot"></div>
+            <span class="text-[10px] font-bold text-gray-500 uppercase tracking-widest">Mining Active</span>
+        </div>
+        <div class="text-[10px] font-bold text-orange-500 uppercase bg-orange-500/10 px-3 py-1 rounded-full">
+            VIP Level 1
+        </div>
     </div>
 
-    <div class="game-area">
-        <img src="https://img.icons8.com/clouds/200/cat.png" class="cat-img" onclick="handleTap()">
-        <p>انقر على القطة لجمع العملات!</p>
+    <div class="text-center mb-12">
+        <p class="text-gray-500 text-xs font-bold tracking-[0.2em] mb-2 uppercase">Total Accumulated</p>
+        <h1 id="balance" class="text-6xl font-black orange-glow tracking-tighter transition-all">0.0000</h1>
+        <p id="rate" class="text-orange-500 text-sm mt-3 font-mono leading-none font-bold">+0.0001 /sec</p>
     </div>
 
-    <div class="footer">
-        <button id="adBtn" class="btn btn-ad" onclick="loadAd()">📺 ربح سريع (100+ 💰)</button>
+    <div class="space-y-6 flex-1">
+        <div class="glass-card p-6">
+            <div class="flex justify-between items-center mb-3">
+                <div class="flex items-center gap-2">
+                    <span class="text-lg">⚡</span>
+                    <span class="text-sm font-black uppercase tracking-tight">Energy Hub</span>
+                </div>
+                <span id="energyText" class="text-sm font-mono font-bold">100/100</span>
+            </div>
+            <div class="w-full bg-white/5 h-4 rounded-full p-1 border border-white/5">
+                <div id="energyBar" class="bg-orange-500 h-full rounded-full transition-all duration-1000 shadow-[0_0_10px_#f59e0b]" style="width: 100%"></div>
+            </div>
+        </div>
+
+        <button onclick="watchAdToRefill()" id="adBtn" class="w-full btn-gradient text-black font-black py-7 rounded-[2rem] flex items-center justify-center gap-4 active:scale-95 transition-all shadow-2xl relative overflow-hidden">
+            <span class="text-2xl">🔋</span>
+            <span class="text-lg uppercase tracking-tighter">Refill Energy & Boost</span>
+        </button>
+
+        <div class="grid grid-cols-2 gap-4">
+            <div class="glass-card p-5 text-center">
+                <p class="text-[9px] text-gray-500 uppercase font-black mb-1">Hardware</p>
+                <p class="text-sm font-bold">V1 Miner</p>
+            </div>
+            <div class="glass-card p-5 text-center">
+                <p class="text-[9px] text-gray-500 uppercase font-black mb-1">Network</p>
+                <p class="text-sm font-bold text-green-500">Stable</p>
+            </div>
+        </div>
+    </div>
+
+    <div class="text-center pt-6">
+        <p class="text-[9px] text-gray-700 font-mono">NODE ID: 19316 | SESSION SECURE</p>
     </div>
 
     <script>
-        let score = 0;
+        // --- تهيئة المتغيرات ---
+        let balance = 0.0000;
         let energy = 100;
-        const maxEnergy = 100;
+        const MINING_RATE = 0.0001; // السرعة
+        const ENERGY_DECAY = 0.2; // سرعة نفاد الطاقة
 
-        // تفعيل نظام الأرباح برقمك الخاص 20473
-        const AdController = window.Adsgram.init({ blockId: "19316" });
-
-        function handleTap() {
-            if (energy > 0) {
-                score += 1;
-                energy -= 1;
-                updateUI();
-            } else {
-                alert("نفدت الطاقة! شاهد إعلاناً للشحن فوراً.");
-            }
+        // --- ميزة الحفظ التلقائي (localStorage) ---
+        function loadData() {
+            const savedBalance = localStorage.getItem('bt_balance');
+            const savedEnergy = localStorage.getItem('bt_energy');
+            
+            if (savedBalance) balance = parseFloat(savedBalance);
+            if (savedEnergy) energy = parseFloat(savedEnergy);
+            updateUI();
         }
 
+        function saveData() {
+            localStorage.setItem('bt_balance', balance.toFixed(8));
+            localStorage.setItem('bt_energy', energy.toFixed(2));
+        }
+
+        // --- تحديث الواجهة ---
         function updateUI() {
-            document.getElementById('points').innerText = score;
-            document.getElementById('energy').innerText = energy;
-            document.getElementById('energy-fill').style.width = (energy / maxEnergy * 100) + "%";
-        }
-
-        async function loadAd() {
+            document.getElementById('balance').innerText = balance.toFixed(4);
+            document.getElementById('energyText').innerText = Math.ceil(energy) + "/100";
+            document.getElementById('energyBar').style.width = energy + "%";
+            
             const btn = document.getElementById('adBtn');
-            btn.disabled = true;
-            btn.innerText = "جاري التحميل...";
-
-            try {
-                await AdController.show().then((result) => {
-                    // المستخدم شاهد الإعلان كاملاً
-                    score += 100;
-                    energy = 100;
-                    updateUI();
-                    alert("مبروك! حصلت على مكافأة 100 عملة وشحن كامل للطاقة.");
-                });
-            } catch (error) {
-                // فشل تحميل الإعلان أو قام المستخدم بإغلاقه
-                alert("لا يوجد إعلان متاح الآن، حاول مرة أخرى بعد قليل.");
-            } finally {
-                btn.disabled = false;
-                btn.innerText = "📺 ربح سريع (100+ 💰)";
+            if (energy <= 10) {
+                btn.classList.add('animate-bounce', 'bg-orange-500', 'text-white');
+                btn.classList.remove('btn-gradient');
+            } else {
+                btn.classList.remove('animate-bounce', 'bg-orange-500', 'text-white');
+                btn.classList.add('btn-gradient');
             }
         }
 
-        // إشعار تلجرام أن التطبيق جاهز
-        window.Telegram.WebApp.ready();
-        window.Telegram.WebApp.expand();
+        // --- منطق التعدين ---
+        setInterval(() => {
+            if (energy > 0) {
+                balance += MINING_RATE;
+                energy -= ENERGY_DECAY;
+                if (energy < 0) energy = 0;
+                updateUI();
+                saveData(); // حفظ البيانات كل ثانية
+            }
+        }, 1000);
+
+        // --- منطق الإعلانات (Unit 19316) ---
+        function watchAdToRefill() {
+            const btn = document.getElementById('adBtn');
+            const originalHTML = btn.innerHTML;
+            
+            btn.disabled = true;
+            btn.innerText = "Connecting to Ad Server...";
+
+            const AdController = window.Adsgram.init({ blockId: "19316" });
+
+            AdController.show().then(() => {
+                // مكافأة عند النجاح
+                energy = 100;
+                balance += 0.0500; // مكافأة كاش فورية
+                btn.disabled = false;
+                btn.innerHTML = originalHTML;
+                alert("✅ SUCCESS: Energy 100% & Bonus +0.05 Points!");
+                updateUI();
+                saveData();
+            }).catch(() => {
+                btn.disabled = false;
+                btn.innerHTML = originalHTML;
+                alert("⚠️ Error: You must watch the full ad to refill energy.");
+            });
+        }
+
+        // تشغيل التحميل عند فتح الصفحة
+        window.onload = loadData;
     </script>
 </body>
 </html>
