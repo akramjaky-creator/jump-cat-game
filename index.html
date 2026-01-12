@@ -3,52 +3,54 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Jump Cat - Earn Points 🐱</title>
+    <title>Jump Cat - Mining Center</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <script src="https://adsgram.ai/js-sdk/direct-link.js"></script>
     <style>
-        body { margin: 0; background: #1a202c; color: white; font-family: 'Arial', sans-serif; overflow: hidden; touch-action: manipulation; text-align: center; }
-        #game-area { width: 100vw; height: 250px; background: #2d3748; position: relative; border-bottom: 8px solid #4a5568; margin-top: 60px; }
-        #cat { width: 50px; height: 50px; position: absolute; bottom: 0; left: 60px; font-size: 35px; display: flex; align-items: center; justify-content: center; z-index: 2; }
-        #obstacle { width: 35px; height: 35px; background: #f56565; position: absolute; bottom: 0; right: -50px; border-radius: 5px; }
-        .jump-anim { animation: jump 0.6s cubic-bezier(0.1, 0.4, 0.4, 1); }
+        body { margin: 0; background: #0f172a; color: white; font-family: 'Segoe UI', Arial; overflow: hidden; touch-action: manipulation; text-align: center; }
+        #game-container { width: 100vw; height: 300px; background: #1e293b; position: relative; border-bottom: 8px solid #334155; margin-top: 40px; }
+        #cat { width: 50px; height: 50px; position: absolute; bottom: 0; left: 60px; font-size: 38px; display: flex; align-items: center; justify-content: center; z-index: 2; }
+        #obstacle { width: 35px; height: 35px; background: #ef4444; position: absolute; bottom: 0; right: -50px; border-radius: 6px; box-shadow: 0 0 10px #ef4444; }
+        /* حركات اللعبة */
+        .jump-anim { animation: jump 0.6s ease-out; }
         @keyframes jump { 0% {bottom: 0;} 50% {bottom: 140px;} 100% {bottom: 0;} }
         .move-anim { animation: move 1.6s infinite linear; }
-        @keyframes move { 0% {right: -50px;} 100% {right: 110%;} }
-        #score-board { position: fixed; top: 15px; width: 100%; font-size: 22px; font-weight: bold; color: #63b3ed; }
-        #game-over-screen { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.9); flex-direction: column; align-items: center; justify-content: center; z-index: 10; }
-        .reward-btn { background: #38a169; color: white; padding: 18px 35px; border: none; border-radius: 15px; font-size: 20px; font-weight: bold; cursor: pointer; box-shadow: 0 4px 15px rgba(0,0,0,0.3); margin-top: 15px; }
-        .restart-btn { background: #e53e3e; color: white; padding: 12px 25px; border: none; border-radius: 10px; margin-top: 10px; cursor: pointer; }
+        @keyframes move { 0% {right: -50px;} 100% {right: 115%;} }
+        /* الواجهة */
+        #points-display { font-size: 26px; font-weight: bold; color: #38bdf8; margin-top: 20px; text-shadow: 0 0 5px rgba(56, 189, 248, 0.5); }
+        #over-screen { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(15, 23, 42, 0.95); flex-direction: column; align-items: center; justify-content: center; z-index: 10; padding: 20px; }
+        .btn-main { background: linear-gradient(135deg, #22c55e 0%, #16a34a 100%); color: white; padding: 18px 40px; border: none; border-radius: 16px; font-size: 20px; font-weight: bold; cursor: pointer; box-shadow: 0 4px 15px rgba(34, 197, 94, 0.4); margin-top: 20px; width: 85%; }
+        .btn-restart { background: transparent; color: #94a3b8; border: 1px solid #334155; padding: 10px 20px; border-radius: 10px; margin-top: 15px; cursor: pointer; }
     </style>
 </head>
-<body onclick="jump()">
+<body onclick="handleJump()">
 
-    <div id="score-board">النقاط الحالية: <span id="current-score">0</span></div>
+    <div id="points-display">نقاط التعدين: <span id="pt">0</span></div>
 
-    <div id="game-area">
+    <div id="game-container">
         <div id="cat">🐱</div>
         <div id="obstacle" class="move-anim"></div>
     </div>
 
-    <div id="game-over-screen">
-        <h1 style="color: #fc8181;">انتهت اللعبة!</h1>
-        <p style="font-size: 18px;">لقد جمعت: <span id="final-score">0</span> نقطة</p>
-        <p style="color: #a0aec0; padding: 0 20px;">شاهد إعلان لتحويل نقاطك إلى رصيد $ في البوت</p>
-        <button class="btn reward-btn" onclick="claimReward()">💰 تحويل النقاط لرصيد</button>
-        <button class="restart-btn" onclick="location.reload()">إعادة اللعب</button>
+    <div id="over-screen">
+        <h1 style="color: #f87171; font-size: 32px;">توقف التعدين! 🛑</h1>
+        <p style="font-size: 18px; color: #cbd5e1;">شاهد الإعلان لتحويل نقاطك وزيادة قوة الـ Mining</p>
+        <button class="btn-main" onclick="claimReward()">💰 زيادة القوة (Boost)</button>
+        <button class="btn-restart" onclick="location.reload()">إعادة المحاولة</button>
     </div>
 
     <script>
         const tg = window.Telegram.WebApp;
         tg.expand();
-        // معرفك الخاص 19316
-        const AdController = window.Adsgram.init({ blockId: "19316", debug: true });
+
+        // استخدام معرفك الصحيح 19316
+        const AdController = window.Adsgram.init({ blockId: "19316", debug: false });
 
         let score = 0;
-        let isGameOver = false;
+        let isDead = false;
 
-        function jump() {
-            if (isGameOver) return;
+        function handleJump() {
+            if (isDead) return;
             const cat = document.getElementById("cat");
             if (!cat.classList.contains("jump-anim")) {
                 cat.classList.add("jump-anim");
@@ -56,51 +58,40 @@
             }
         }
 
-        // تحديث النقاط وفحص الاصطدام
+        // محرك اللعبة لفحص التصادم
         const gameLoop = setInterval(() => {
-            if (isGameOver) return;
+            if (isDead) return;
 
             const cat = document.getElementById("cat");
-            const obstacle = document.getElementById("obstacle");
+            const obs = document.getElementById("obstacle");
             
             let catBottom = parseInt(window.getComputedStyle(cat).getPropertyValue("bottom"));
-            let obsRight = parseInt(window.getComputedStyle(obstacle).getPropertyValue("right"));
+            let obsRight = parseInt(window.getComputedStyle(obs).getPropertyValue("right"));
             let obsLeft = window.innerWidth - obsRight - 35;
 
-            // زيادة النقاط عند تجاوز العقبة
-            if (obsLeft < 0) {
-                // نزيد النقاط فقط مرة واحدة لكل عقبة (تبسيطاً)
-            }
-
-            // فحص الاصطدام
+            // كشف التصادم بدقة
             if (obsLeft < 110 && obsLeft > 60 && catBottom < 35) {
-                gameOver();
+                endGame();
             }
-        }, 10);
 
-        // زيادة النقاط مع الوقت
-        const scoreInterval = setInterval(() => {
-            if (!isGameOver) {
-                score += 10;
-                document.getElementById("current-score").innerText = score;
-            }
-        }, 500);
+            score++;
+            document.getElementById("pt").innerText = score;
+        }, 50);
 
-        function gameOver() {
-            isGameOver = true;
-            document.getElementById("game-over-screen").style.display = "flex";
-            document.getElementById("final-score").innerText = score;
+        function endGame() {
+            isDead = true;
+            document.getElementById("over-screen").style.display = "flex";
             document.getElementById("obstacle").style.animation = "none";
         }
 
         function claimReward() {
-            // استدعاء إعلان Adsgram
+            // استدعاء الإعلان الحقيقي
             AdController.show().then(() => {
-                // إرسال إشارة النجاح للبوت في Pydroid 3
+                // إرسال الإشارة المتفق عليها للبوت في Pydroid
                 tg.sendData("ad_watched_successfully");
                 tg.close();
             }).catch((err) => {
-                alert("نعتذر، لم يتوفر إعلان حالياً لتحويل النقاط. حاول مجدداً.");
+                alert("نعتذر، لا يوجد إعلانات حالياً لبلدك. جرب لاحقاً.");
             });
         }
     </script>
