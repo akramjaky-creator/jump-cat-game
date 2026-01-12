@@ -1,113 +1,74 @@
 <!DOCTYPE html>
-<html lang="ar" dir="rtl">
+<html lang="ar">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Jump Cat Game 🐱</title>
+    <title>Jump Cat 🐱</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <script src="https://adsgram.ai/js-sdk/direct-link.js"></script>
     <style>
-        body { margin: 0; overflow: hidden; font-family: sans-serif; background: #87CEEB; touch-action: manipulation; }
-        #game-container { width: 100vw; height: 100vh; position: relative; }
-        #cat { width: 50px; height: 50px; position: absolute; bottom: 20px; left: 50px; background: orange; border-radius: 10px; transition: bottom 0.1s; z-index: 2; }
-        #obstacle { width: 40px; height: 40px; position: absolute; bottom: 20px; right: -50px; background: red; z-index: 2; }
-        #score { position: absolute; top: 20px; left: 20px; font-size: 24px; color: white; font-weight: bold; }
-        #overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); display: none; flex-direction: column; align-items: center; justify-content: center; color: white; z-index: 10; }
-        .btn { padding: 15px 30px; font-size: 20px; background: #2ecc71; color: white; border: none; border-radius: 10px; cursor: pointer; margin-top: 20px; }
+        body { margin: 0; background: #87CEEB; font-family: Arial; overflow: hidden; touch-action: manipulation; }
+        #game-box { width: 100vw; height: 200px; background: white; position: relative; border-bottom: 10px solid #555; margin-top: 50px; }
+        #cat { width: 50px; height: 50px; background: orange; position: absolute; bottom: 0; left: 50px; border-radius: 8px; font-size: 30px; display: flex; align-items: center; justify-content: center; }
+        #obstacle { width: 30px; height: 30px; background: red; position: absolute; bottom: 0; right: -50px; }
+        .jump-anim { animation: jump 0.6s ease-out; }
+        @keyframes jump { 0% {bottom: 0;} 50% {bottom: 120px;} 100% {bottom: 0;} }
+        .move-anim { animation: move 1.5s infinite linear; }
+        @keyframes move { 0% {right: -50px;} 100% {right: 100%;} }
+        #game-over { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); color: white; flex-direction: column; align-items: center; justify-content: center; z-index: 10; }
+        .btn { padding: 15px 30px; font-size: 18px; border: none; border-radius: 12px; cursor: pointer; margin: 10px; }
     </style>
 </head>
-<body onclick="jump()">
+<body onclick="handleTap()">
 
-<div id="game-container">
-    <div id="score">Score: 0</div>
-    <div id="cat"></div>
-    <div id="obstacle"></div>
-</div>
+    <h2 style="text-align: center; color: white;">اضغط للقفز وتجنب المربعات!</h2>
+    
+    <div id="game-box">
+        <div id="cat">🐱</div>
+        <div id="obstacle" class="move-anim"></div>
+    </div>
 
-<div id="overlay">
-    <h1>انتهت اللعبة! 🙀</h1>
-    <p id="final-score"></p>
-    <button class="btn" onclick="showAd()">📺 شاهد إعلان للمضاعفة والربح</button>
-    <button class="btn" style="background:#e74c3c" onclick="resetGame()">إعادة اللعب</button>
-</div>
+    <div id="game-over">
+        <h1>لقد خسرت! 😿</h1>
+        <button class="btn" style="background: #27ae60;" onclick="watchAd()">💰 شاهد إعلان للمكافأة</button>
+        <button class="btn" style="background: #e74c3c;" onclick="location.reload()">إعادة اللعب</button>
+    </div>
 
-<script>
-    const tg = window.Telegram.WebApp;
-    tg.expand();
-    const AdController = window.Adsgram.init({ blockId: "19316", debug: true });
+    <script>
+        const tg = window.Telegram.WebApp;
+        tg.expand();
+        const AdController = window.Adsgram.init({ blockId: "19316", debug: true });
 
-    let cat = document.getElementById("cat");
-    let obstacle = document.getElementById("obstacle");
-    let scoreDisplay = document.getElementById("score");
-    let score = 0;
-    let isJumping = false;
-    let isGameOver = false;
-
-    function jump() {
-        if (isJumping || isGameOver) return;
-        isJumping = true;
-        let position = 20;
-        let upInterval = setInterval(() => {
-            if (position >= 150) {
-                clearInterval(upInterval);
-                let downInterval = setInterval(() => {
-                    if (position <= 20) {
-                        clearInterval(downInterval);
-                        isJumping = false;
-                    }
-                    position -= 5;
-                    cat.style.bottom = position + "px";
-                }, 20);
+        function handleTap() {
+            const cat = document.getElementById("cat");
+            if (!cat.classList.contains("jump-anim")) {
+                cat.classList.add("jump-anim");
+                setTimeout(() => cat.classList.remove("jump-anim"), 600);
             }
-            position += 5;
-            cat.style.bottom = position + "px";
-        }, 20);
-    }
+        }
 
-    function moveObstacle() {
-        if (isGameOver) return;
-        let obstaclePos = -50;
-        let moveInterval = setInterval(() => {
-            if (isGameOver) { clearInterval(moveInterval); return; }
-            obstaclePos += 5;
-            if (obstaclePos > window.innerWidth) {
-                obstaclePos = -50;
-                score++;
-                scoreDisplay.innerText = "Score: " + score;
-            }
-            obstacle.style.right = obstaclePos + "px";
-
-            // Collision Detection
+        // فحص الاصطدام
+        setInterval(() => {
+            const cat = document.getElementById("cat");
+            const obstacle = document.getElementById("obstacle");
             let catBottom = parseInt(window.getComputedStyle(cat).getPropertyValue("bottom"));
-            let obstacleRight = parseInt(window.getComputedStyle(obstacle).getPropertyValue("right"));
-            let obstacleLeftFromRight = window.innerWidth - obstacleRight - 40;
+            let obsRight = parseInt(window.getComputedStyle(obstacle).getPropertyValue("right"));
+            let obsLeft = window.innerWidth - obsRight - 30;
 
-            if (obstacleLeftFromRight < 100 && obstacleLeftFromRight > 50 && catBottom <= 60) {
-                gameOver();
+            if (obsLeft < 100 && obsLeft > 50 && catBottom < 30) {
+                document.getElementById("game-over").style.display = "flex";
+                obstacle.style.animation = "none";
             }
-        }, 20);
-    }
+        }, 10);
 
-    function gameOver() {
-        isGameOver = true;
-        document.getElementById("overlay").style.display = "flex";
-        document.getElementById("final-score").innerText = "نقاطك: " + score;
-    }
-
-    function resetGame() {
-        location.reload();
-    }
-
-    function showAd() {
-        AdController.show().then(() => {
-            tg.sendData("ad_watched_successfully");
-            tg.close();
-        }).catch(() => {
-            alert("فشل تحميل الإعلان، جرب مرة أخرى.");
-        });
-    }
-
-    moveObstacle();
-</script>
+        function watchAd() {
+            AdController.show().then(() => {
+                tg.sendData("ad_watched_successfully");
+                tg.close();
+            }).catch(() => {
+                alert("يرجى المحاولة مرة أخرى لاحقاً");
+            });
+        }
+    </script>
 </body>
 </html>
