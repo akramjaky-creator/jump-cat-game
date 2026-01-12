@@ -1,137 +1,91 @@
 <!DOCTYPE html>
-<html lang="ar">
+<html lang="ar" dir="rtl">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>bitTycoon</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>شحن الطاقة - bitTycoon</title>
     <script src="https://sad.adsgram.ai/js/adsgram-ad-sdk.js"></script>
     <style>
-        /* تصميم أساسي جداً لضمان التشغيل */
         body {
             background-color: #161d2d;
             color: white;
-            margin: 0;
-            padding: 0;
             font-family: sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            margin: 0;
+        }
+        .container {
             text-align: center;
-        }
-        .header { padding: 20px; border-bottom: 1px solid #2d3748; display: flex; justify-content: space-between; }
-        .balance { color: #facc15; font-size: 20px; font-weight: bold; }
-        
-        .battery-grid {
-            display: grid;
-            grid-template-columns: repeat(8, 1fr);
-            gap: 5px;
             padding: 20px;
-            background: #0d1117;
-            margin: 20px;
-            border-radius: 10px;
-        }
-        .cell {
-            height: 35px;
             border: 1px solid #2d3748;
-            background: #161d2d;
-            border-radius: 4px;
+            border-radius: 15px;
+            background-color: #1f283d;
         }
-        .active-cell {
-            background: linear-gradient(to top, #22c55e, #4ade80);
-            box-shadow: 0 0 5px #22c55e;
+        .energy-val {
+            font-size: 24px;
+            font-weight: bold;
+            color: #22c55e;
+            margin-bottom: 20px;
         }
-        
-        .btn {
-            background: #f97316;
+        button {
+            background-color: #f97316;
             color: black;
             border: none;
             padding: 15px 30px;
-            border-radius: 50px;
+            font-size: 18px;
             font-weight: bold;
-            font-size: 16px;
+            border-radius: 50px;
             cursor: pointer;
-            width: 80%;
-            margin-top: 20px;
         }
-        .nav {
-            position: fixed;
-            bottom: 0;
-            width: 100%;
-            height: 60px;
-            background: #0d1117;
-            display: flex;
-            justify-content: space-around;
-            align-items: center;
-            border-top: 1px solid #2d3748;
+        button:disabled {
+            background-color: #4b5563;
         }
     </style>
 </head>
 <body>
 
-    <div class="header">
-        <div style="font-weight: bold;">bitTycoon</div>
-        <div id="balance" class="balance">0.00000000</div>
-    </div>
-
-    <div style="margin-top: 20px; font-size: 12px; color: #0ea5e9;">🔋 ENERGY: <span id="count">0</span>/24</div>
-    
-    <div id="grid" class="battery-grid">
-        </div>
-
-    <button onclick="watchAd()" class="btn">شحن طاقة (إعلان)</button>
-
-    <div class="nav">
-        <div>📊</div>
-        <div>📋</div>
-        <div>👥</div>
-        <div>👛</div>
+    <div class="container">
+        <h2>نظام شحن الطاقة</h2>
+        <div class="energy-val">البطاريات: <span id="count">0</span> / 24</div>
+        <button id="adBtn" onclick="showMyAd()">🎬 مشاهدة إعلان لشحن +1</button>
     </div>
 
     <script>
-        // استخدام localStorage لحفظ البيانات
-        let tonBalance = parseFloat(localStorage.getItem('ton_bal')) || 0;
-        let energy = parseInt(localStorage.getItem('energy_pwr')) || 0;
+        // حفظ واسترجاع عدد البطاريات من ذاكرة الهاتف
+        let batteryCount = parseInt(localStorage.getItem('user_energy')) || 0;
+        document.getElementById('count').innerText = batteryCount;
 
-        function updateUI() {
-            document.getElementById('balance').innerText = tonBalance.toFixed(8);
-            document.getElementById('count').innerText = energy;
-            
-            const grid = document.getElementById('grid');
-            grid.innerHTML = '';
-            for(let i=0; i<24; i++) {
-                const cell = document.createElement('div');
-                cell.className = 'cell' + (i < energy ? ' active-cell' : '');
-                grid.appendChild(cell);
-            }
-            
-            localStorage.setItem('ton_bal', tonBalance);
-            localStorage.setItem('energy_pwr', energy);
+        function showMyAd() {
+            const btn = document.getElementById('adBtn');
+            btn.disabled = true;
+            btn.innerText = "جاري التحميل...";
+
+            // تهيئة الإعلان بالـ ID الخاص بك 19316
+            const AdController = window.Adsgram.init({ blockId: "19316" });
+
+            AdController.show().then(() => {
+                // في حال شاهد المستخدم الإعلان كاملاً
+                if (batteryCount < 24) {
+                    batteryCount++;
+                    document.getElementById('count').innerText = batteryCount;
+                    localStorage.setItem('user_energy', batteryCount);
+                    alert("✅ تم شحن بطارية واحدة بنجاح!");
+                } else {
+                    alert("البطاريات ممتلئة!");
+                }
+                btn.disabled = false;
+                btn.innerText = "🎬 مشاهدة إعلان لشحن +1";
+            }).catch((error) => {
+                // في حال حدث خطأ أو أغلق المستخدم الإعلان
+                console.error(error);
+                alert("تعذر تحميل الإعلان، تأكد من أنك تفتح البوت من تليجرام.");
+                btn.disabled = false;
+                btn.innerText = "🎬 مشاهدة إعلان لشحن +1";
+            });
         }
-
-        // زيادة الرصيد كل ثانية إذا كانت هناك طاقة
-        setInterval(() => {
-            if(energy > 0) {
-                tonBalance += 0.00000005;
-                updateUI();
-            }
-        }, 1000);
-
-        // وظيفة الإعلان باستخدام الـ ID الخاص بك 19316
-        function watchAd() {
-            if (window.Adsgram) {
-                const ad = window.Adsgram.init({ blockId: "19316" });
-                ad.show().then(() => {
-                    if(energy < 24) {
-                        energy++;
-                        updateUI();
-                    }
-                }).catch((e) => {
-                    alert("لم يكتمل الإعلان أو هناك خطأ في الاتصال");
-                });
-            } else {
-                alert("جاري تحميل نظام الإعلانات... حاول مجدداً");
-            }
-        }
-
-        // تشغيل التحديث عند فتح الصفحة
-        updateUI();
     </script>
 </body>
 </html>
