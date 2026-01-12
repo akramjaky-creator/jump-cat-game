@@ -1,79 +1,44 @@
 <!DOCTYPE html>
-<html lang="ar" dir="rtl">
+<html lang="ar">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Jump Cat Rewards</title>
+    <title>Jump Cat Ad Server</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <script src="https://adsgram.ai/js-sdk/direct-link.js"></script>
-    <style>
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
-            color: white;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            height: 100vh;
-            margin: 0;
-        }
-        .container {
-            background: rgba(255, 255, 255, 0.1);
-            padding: 30px;
-            border-radius: 20px;
-            box-shadow: 0 8px 32px rgba(0,0,0,0.3);
-            backdrop-filter: blur(10px);
-            text-align: center;
-            width: 80%;
-        }
-        button {
-            background-color: #ff9800;
-            color: white;
-            border: none;
-            padding: 15px 30px;
-            font-size: 1.2rem;
-            font-weight: bold;
-            border-radius: 50px;
-            cursor: pointer;
-            transition: transform 0.2s, background-color 0.2s;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
-        }
-        button:active { transform: scale(0.95); background-color: #e68a00; }
-        .info { margin-bottom: 20px; font-size: 1.1rem; }
-    </style>
 </head>
-<body>
+<body style="background-color: #1a1a1a; color: white; text-align: center; font-family: sans-serif; padding-top: 100px;">
 
-<div class="container">
-    <h2>🎯 محطة الأرباح</h2>
-    <p class="info">شاهد الإعلان كاملاً لتصلك المكافأة فوراً في البوت</p>
-    <button id="watchAdBtn">📺 ابدأ المشاهدة الآن</button>
-</div>
+    <div id="status">جاري تجهيز الإعلان...</div>
+    <br>
+    <button id="showAdBtn" style="padding: 20px 40px; font-size: 20px; background: #2ecc71; color: white; border: none; border-radius: 15px; display: none;">
+        ✅ تشغيل الإعلان الآن
+    </button>
 
-<script>
-    const tg = window.Telegram.WebApp;
-    tg.expand(); // فتح الصفحة بكامل الشاشة
+    <script>
+        const tg = window.Telegram.WebApp;
+        tg.expand();
 
-    // تهيئة نظام Adsgram مع معرفك 19316 وتفعيل خاصية debug
-    const AdController = window.Adsgram.init({ 
-        blockId: "19316", 
-        debug: true 
-    });
-
-    document.getElementById('watchAdBtn').addEventListener('click', () => {
-        // عرض الإعلان
-        AdController.show().then((result) => {
-            // نجاح المشاهدة: إرسال البيانات للبوت
-            tg.sendData("ad_watched_successfully");
-            tg.close();
-        }).catch((error) => {
-            // فشل المشاهدة أو إغلاق الإعلان مبكراً
-            console.error("Ad error:", error);
-            alert("⚠️ تنبيه: يجب إنهاء الإعلان للحصول على المكافأة.");
+        // إعداد المحرك مع خاصية التجربة (Debug) لضمان العمل
+        const AdController = window.Adsgram.init({ 
+            blockId: "19316", 
+            debug: true 
         });
-    });
-</script>
 
+        // التأكد من جاهزية الإعلان قبل إظهار الزر
+        document.getElementById('status').innerText = "اضغط على الزر للمشاهدة والربح";
+        document.getElementById('showAdBtn').style.display = "inline-block";
+
+        document.getElementById('showAdBtn').onclick = () => {
+            AdController.show().then((result) => {
+                // إرسال البيانات للبوت (Pydroid 3)
+                tg.sendData("ad_watched_successfully");
+                tg.close();
+            }).catch((error) => {
+                console.error(error);
+                alert("عذراً، لم يتوفر إعلان حالياً. حاول مرة أخرى بعد قليل.");
+            });
+        };
+    </script>
 </body>
 </html>
