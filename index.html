@@ -3,221 +3,209 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>bitTycoon Pro</title>
+    <title>bitTycoon</title>
     <script src="https://sad.adsgram.ai/js/adsgram-ad-sdk.js"></script>
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@700&family=Inter:wght@400;600;900&display=swap');
-
         :root {
-            --bg-dark: #111827;
-            --bg-card: #1f2937;
-            --ton-blue: #0ea5e9;
-            --mining-green: #22c55e;
-            --accent-orange: #f97316;
+            --bg-blue: #161d2d;
+            --card-dark: #1f283d;
+            --mining-orange: #f97316;
+            --energy-green: #22c55e;
+            --text-gray: #94a3b8;
         }
 
         body {
-            background: radial-gradient(circle at top, #1e293b 0%, #0f172a 100%);
+            background-color: var(--bg-blue);
             color: white;
-            font-family: 'Inter', sans-serif;
-            margin: 0;
-            padding: 0;
+            font-family: 'Segoe UI', Roboto, sans-serif;
+            margin: 0; padding: 0;
             overflow: hidden;
-            height: 100vh;
+            user-select: none;
         }
 
-        /* Top Header */
-        .header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 20px;
-            background: rgba(15, 23, 42, 0.8);
-            backdrop-filter: blur(10px);
+        /* الهيدر العلوي المطابق للصور */
+        .top-bar {
+            display: flex; justify-content: space-between; align-items: center;
+            padding: 15px 20px; background: rgba(0,0,0,0.2);
         }
-
-        .logo-section { display: flex; align-items: center; gap: 12px; }
-        .logo-b {
-            width: 40px; height: 40px; background: var(--mining-green);
-            border-radius: 12px; display: flex; align-items: center;
-            justify-content: center; font-weight: 900; color: black; font-size: 22px;
-            box-shadow: 0 0 15px rgba(34, 197, 94, 0.3);
+        .user-meta { display: flex; align-items: center; gap: 10px; }
+        .app-icon {
+            width: 38px; height: 38px; background: var(--energy-green);
+            border-radius: 10px; display: flex; align-items: center;
+            justify-content: center; color: black; font-weight: 900; font-size: 20px;
         }
+        .stats-area { text-align: right; }
+        .crypto-val { color: #facc15; font-weight: bold; font-size: 16px; margin: 0; letter-spacing: 0.5px; }
 
-        .balance-section { text-align: right; }
-        .balance-value { 
-            color: #fbbf24; font-family: 'Orbitron', sans-serif; 
-            font-size: 18px; margin: 0; filter: drop-shadow(0 0 5px rgba(251, 191, 36, 0.3));
-        }
-
-        /* Pages System */
-        .page { display: none; height: calc(100vh - 160px); overflow-y: auto; padding: 20px; animation: fadeIn 0.3s ease; }
+        /* حاوية الصفحات */
+        .main-container { height: calc(100vh - 150px); overflow-y: auto; padding: 20px; }
+        .page { display: none; }
         .page.active { display: block; }
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
 
-        /* Battery Grid المطابق تماماً */
-        .energy-label {
-            text-align: center; margin-bottom: 15px;
-            font-size: 10px; font-weight: 900; color: var(--ton-blue);
-            text-transform: uppercase; letter-spacing: 2px;
+        /* تصميم البطاريات (Matrix) كما في الصورة 1000056830 */
+        .energy-header { text-align: center; color: #38bdf8; font-size: 12px; font-weight: 900; margin-bottom: 12px; }
+        .battery-matrix {
+            display: grid; grid-template-columns: repeat(8, 1fr); gap: 8px;
+            background: #0d1117; padding: 15px; border-radius: 20px;
+            border: 1px solid rgba(255,255,255,0.05); margin-bottom: 30px;
         }
-
-        .battery-grid {
-            display: grid; grid-template-columns: repeat(8, 1fr); gap: 6px;
-            background: rgba(0,0,0,0.3); padding: 15px; border-radius: 20px;
-            border: 1px solid rgba(255,255,255,0.05); margin-bottom: 25px;
-        }
-
-        .cell {
-            height: 45px; background: #020617; border: 1px solid #1e293b;
-            border-radius: 6px; position: relative; overflow: hidden;
-        }
-
+        .cell { height: 45px; background: #161d2d; border: 1px solid #2d3748; border-radius: 6px; position: relative; overflow: hidden; }
         .fill {
             position: absolute; bottom: 0; width: 100%; height: 100%;
             background: linear-gradient(180deg, #4ade80 0%, #16a34a 100%);
-            box-shadow: 0 0 15px rgba(34, 197, 94, 0.6);
+            box-shadow: 0 0 10px rgba(34, 197, 94, 0.5);
         }
 
-        /* Buttons */
-        .btn-orange {
-            background: linear-gradient(135deg, #fb923c 0%, #f97316 100%);
-            color: black; border: none; width: 100%; padding: 18px;
-            border-radius: 20px; font-weight: 900; text-transform: uppercase;
-            font-size: 14px; cursor: pointer; transition: 0.2s;
-            box-shadow: 0 10px 20px rgba(249, 115, 22, 0.2);
+        /* الأزرار الكبيرة */
+        .action-btn {
+            background: linear-gradient(180deg, #fb923c 0%, #f97316 100%);
+            color: black; border: none; width: 100%; padding: 16px;
+            border-radius: 50px; font-weight: 900; font-size: 14px;
+            text-transform: uppercase; cursor: pointer; box-shadow: 0 4px 15px rgba(249, 115, 22, 0.3);
         }
 
-        /* Cards */
-        .card { background: #1f2937; border-radius: 20px; padding: 20px; margin-bottom: 15px; border: 1px solid rgba(255,255,255,0.05); }
-
-        /* Bottom Nav */
-        .nav-bar {
-            position: fixed; bottom: 0; width: 100%; height: 85px;
-            background: #0f172a; border-top: 1px solid #1e293b;
-            display: flex; justify-content: space-around; padding-bottom: 15px;
+        /* الكروت في صفحة العقود والإحالات */
+        .contract-card {
+            background: var(--card-dark); border-radius: 18px;
+            padding: 15px; margin-bottom: 15px; display: flex;
+            justify-content: space-between; align-items: center;
         }
 
-        .nav-link {
-            display: flex; flex-direction: column; align-items: center;
-            justify-content: center; color: #64748b; font-size: 10px;
-            font-weight: 700; cursor: pointer; transition: 0.3s;
+        /* شريط التنقل السفلي - مطابق للصور */
+        .bottom-nav {
+            position: fixed; bottom: 0; left: 0; right: 0;
+            background: #0d1117; height: 80px; display: flex;
+            justify-content: space-around; align-items: center;
+            border-top: 1px solid #2d3748; padding-bottom: 10px;
         }
+        .nav-tab { color: #64748b; text-align: center; font-size: 10px; font-weight: bold; cursor: pointer; }
+        .nav-tab.active { color: white; }
+        .nav-tab i { display: block; font-size: 22px; margin-bottom: 5px; font-style: normal; }
 
-        .nav-link.active { color: white; }
-        .nav-link span { font-size: 24px; margin-bottom: 4px; }
-
-        /* Wallet Card Custom */
+        /* تصميم صفحة المحفظة - الصورة 1000056834 */
         .wallet-card {
-            background: linear-gradient(135deg, #0284c7 0%, #0369a1 100%);
-            padding: 30px; border-radius: 30px; position: relative; overflow: hidden;
+            background: #0284c7; padding: 25px; border-radius: 25px;
+            margin-bottom: 20px; position: relative;
         }
     </style>
 </head>
 <body>
 
-    <div class="header">
-        <div class="logo-section">
-            <div class="logo-b">B</div>
+    <div class="top-bar">
+        <div class="user-meta">
+            <div class="app-icon">B</div>
             <div>
-                <div style="font-weight: 900; font-size: 14px;">bitTycoon</div>
-                <div style="font-size: 10px; color: #64748b; font-weight: bold;">ID: 2708945</div>
+                <div style="font-weight: 900; font-size: 13px;">bitTycoon</div>
+                <div style="font-size: 9px; color: var(--text-gray);">ID: 2708945</div>
             </div>
         </div>
-        <div class="balance-section">
-            <p id="top-bal" class="balance-value">0.00000000</p>
-            <p style="font-size: 9px; color: #64748b; font-weight: 900; margin: 0;">TON BALANCE</p>
+        <div class="stats-area">
+            <p id="top-balance" class="crypto-val">0.00000000</p>
+            <p style="font-size: 9px; color: var(--text-gray); font-weight: 900; margin: 0;">TON BALANCE</p>
         </div>
     </div>
 
-    <div id="dash" class="page active">
-        <div class="energy-label">🔋 Energy Matrix: <span id="count">0</span>/24</div>
-        <div id="grid" class="battery-grid"></div>
-        <button onclick="navTo('contracts')" class="btn-orange">Mining Contract</button>
-    </div>
+    <div class="main-container">
+        <div id="page-dashboard" class="page active">
+            <div class="energy-header">🔋 ENERGY LEVEL: <span id="energy-txt">0</span>/24</div>
+            <div id="matrix" class="battery-matrix"></div>
+            <button onclick="switchTab('contracts')" class="action-btn">Mining Contract</button>
+        </div>
 
-    <div id="contracts" class="page">
-        <p style="color: #64748b; font-size: 11px; font-weight: 900; margin-bottom: 15px;">FREE CONTRACTS</p>
-        <div class="card" style="display: flex; justify-content: space-between; align-items: center;">
-            <div style="display: flex; align-items: center; gap: 15px;">
-                <span style="font-size: 30px;">🎬</span>
-                <div>
-                    <div style="font-weight: bold; font-size: 14px;">Watch Ads</div>
-                    <div style="font-size: 10px; color: #94a3b8;">Charge 1 Battery Unit</div>
+        <div id="page-contracts" class="page">
+            <p style="font-size: 11px; font-weight: 900; color: var(--text-gray); margin-bottom: 15px;">FREE CONTRACTS</p>
+            <div class="contract-card">
+                <div style="display: flex; align-items: center; gap: 12px;">
+                    <span style="font-size: 28px;">🎬</span>
+                    <div>
+                        <div style="font-weight: 900; font-size: 14px;">Watch Ads</div>
+                        <div style="font-size: 10px; color: var(--text-gray);">+1 Battery Unit</div>
+                    </div>
                 </div>
+                <button onclick="triggerAd()" id="adBtn" style="background: #fbbf24; border: none; padding: 8px 18px; border-radius: 10px; font-weight: 900; font-size: 11px;">START</button>
             </div>
-            <button onclick="showAd()" style="background: #fbbf24; border: none; padding: 8px 20px; border-radius: 12px; font-weight: 900; font-size: 11px;">START</button>
+        </div>
+
+        <div id="page-referral" class="page" style="text-align: center;">
+            <h2 style="font-weight: 900; margin-top: 20px;">Referral</h2>
+            <div class="contract-card" style="display: block; padding: 30px; margin-top: 30px;">
+                <p style="font-size: 11px; color: var(--text-gray); font-weight: 900; letter-spacing: 2px;">INVITATION CODE</p>
+                <p style="font-size: 32px; font-weight: 900; color: #0ea5e9; margin: 15px 0;">41014646</p>
+            </div>
+            <button class="action-btn" style="background: #22c55e; margin-top: 20px;">Invite Friends</button>
+        </div>
+
+        <div id="page-wallet" class="page">
+            <div class="wallet-card">
+                <p style="font-size: 12px; font-weight: bold; opacity: 0.8;">Total Balance</p>
+                <p id="wall-balance" style="font-size: 28px; font-weight: 900; margin: 12px 0;">0.00000000</p>
+                <button onclick="alert('Withdrawal in progress...')" style="background: white; color: #0284c7; border: none; padding: 10px 22px; border-radius: 12px; font-weight: 900; font-size: 11px;">WITHDRAW</button>
+            </div>
+            <div style="text-align: center; font-size: 10px; color: var(--text-gray); font-weight: bold;">
+                DEPOSIT ADDRESS (USDT BEP20):<br>TNNFBZEbTgU1q2xKhVBC8CwrbzCmEL3bpX
+            </div>
         </div>
     </div>
 
-    <div id="refs" class="page" style="text-align: center;">
-        <h2 style="margin-top: 30px; font-weight: 900;">Referral</h2>
-        <div class="card" style="margin-top: 40px; padding: 40px;">
-            <p style="font-size: 11px; color: #64748b; font-weight: 900; letter-spacing: 2px;">INVITATION CODE</p>
-            <p style="font-size: 35px; font-weight: 900; color: var(--ton-blue); margin: 15px 0;">41014646</p>
-        </div>
-        <button class="btn-orange" style="background: #22c55e; margin-top: 20px;">Invite Friends</button>
-    </div>
-
-    <div id="wallet" class="page">
-        <div class="wallet-card">
-            <p style="font-size: 13px; font-weight: 600; opacity: 0.9;">Total Balance</p>
-            <p id="wall-bal" style="font-size: 32px; font-weight: 900; margin: 15px 0;">0.00000000</p>
-            <button onclick="withdraw()" style="background: white; color: #0369a1; border: none; padding: 12px 25px; border-radius: 15px; font-weight: 900; font-size: 12px;">WITHDRAW</button>
-        </div>
-        <div style="margin-top: 25px; padding: 15px; text-align: center; color: #475569; font-size: 10px; font-weight: bold;">
-            DEPOSIT ADDRESS (USDT BEP20):<br>TNNFBZEbTgU1q2xKhVBC8CwrbzCmEL3bpX
-        </div>
-    </div>
-
-    <div class="nav-bar">
-        <div onclick="navTo('dash')" id="n-dash" class="nav-link active"><span>📊</span>DASHBOARD</div>
-        <div onclick="navTo('contracts')" id="n-contracts" class="nav-link"><span>📋</span>CONTRACTS</div>
-        <div onclick="navTo('refs')" id="n-refs" class="nav-link"><span>👥</span>REFERRAL</div>
-        <div onclick="navTo('wallet')" id="n-wallet" class="nav-link"><span>👛</span>WALLET</div>
+    <div class="bottom-nav">
+        <div onclick="switchTab('dashboard')" id="nav-dashboard" class="nav-tab active"><i>📊</i>Dashboard</div>
+        <div onclick="switchTab('contracts')" id="nav-contracts" class="nav-tab"><i>📋</i>Contracts</div>
+        <div onclick="switchTab('referral')" id="nav-referral" class="nav-tab"><i>👥</i>Referral</div>
+        <div onclick="switchTab('wallet')" id="nav-wallet" class="nav-tab"><i>👛</i>Wallet</div>
     </div>
 
     <script>
-        let ton = parseFloat(localStorage.getItem('ton')) || 0;
-        let pwr = parseInt(localStorage.getItem('pwr')) || 0;
+        let balance = parseFloat(localStorage.getItem('bt_bal')) || 0;
+        let pwr = parseInt(localStorage.getItem('bt_pwr')) || 0;
 
-        function refresh() {
-            document.getElementById('top-bal').innerText = ton.toFixed(8);
-            document.getElementById('wall-bal').innerText = ton.toFixed(8);
-            document.getElementById('count').innerText = pwr;
+        function syncUI() {
+            document.getElementById('top-balance').innerText = balance.toFixed(8);
+            document.getElementById('wall-balance').innerText = balance.toFixed(8);
+            document.getElementById('energy-txt').innerText = pwr;
             
-            const g = document.getElementById('grid');
-            g.innerHTML = '';
+            const matrix = document.getElementById('matrix');
+            matrix.innerHTML = '';
             for(let i=0; i<24; i++) {
-                const c = document.createElement('div');
-                c.className = 'cell';
-                if(i < pwr) c.innerHTML = '<div class="fill"></div>';
-                g.appendChild(c);
+                const div = document.createElement('div');
+                div.className = 'cell';
+                if(i < pwr) div.innerHTML = '<div class="fill"></div>';
+                matrix.appendChild(div);
             }
-            localStorage.setItem('ton', ton);
-            localStorage.setItem('pwr', pwr);
+            localStorage.setItem('bt_bal', balance);
+            localStorage.setItem('bt_pwr', pwr);
         }
 
-        setInterval(() => { if(pwr > 0) { ton += 0.00000005; refresh(); } }, 1000);
-        setInterval(() => { if(pwr > 0) { pwr--; refresh(); } }, 300000);
+        // التعدين التلقائي
+        setInterval(() => { if(pwr > 0) { balance += 0.00000005; syncUI(); } }, 1000);
+        // استهلاك الطاقة (بطارية كل 5 دقائق)
+        setInterval(() => { if(pwr > 0) { pwr--; syncUI(); } }, 300000);
 
-        function navTo(id) {
+        function switchTab(id) {
             document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
-            document.querySelectorAll('.nav-link').forEach(l => l.classList.remove('active'));
-            document.getElementById(id).classList.add('active');
-            document.getElementById('n-' + id).classList.add('active');
+            document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
+            document.getElementById('page-' + id).classList.add('active');
+            document.getElementById('nav-' + id).classList.add('active');
         }
 
-        function showAd() {
-            const Ads = window.Adsgram.init({ blockId: "19316" });
-            Ads.show().then(() => {
-                if(pwr < 24) { pwr++; refresh(); alert("🔋 Energy Charged!"); }
-            }).catch(() => alert("Ad Error"));
+        // وظيفة الإعلانات (رابط Adsgram الخاص بك PlatformID: 19316)
+        function triggerAd() {
+            const btn = document.getElementById('adBtn');
+            btn.disabled = true;
+            btn.innerText = "...";
+
+            if (window.Adsgram) {
+                const AdController = window.Adsgram.init({ blockId: "19316" });
+                AdController.show().then(() => {
+                    if(pwr < 24) { pwr++; syncUI(); alert("🔋 Energy Charged!"); }
+                    btn.disabled = false; btn.innerText = "START";
+                }).catch(() => {
+                    btn.disabled = false; btn.innerText = "START";
+                    alert("Ad failed to load. Please try again within Telegram.");
+                });
+            }
         }
 
-        function withdraw() { prompt("Enter Wallet:"); }
-
-        window.onload = refresh;
+        window.onload = syncUI;
     </script>
 </body>
 </html>
