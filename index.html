@@ -1,177 +1,29 @@
 <!DOCTYPE html>
-<html lang="ar" dir="rtl">
+<html>
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Jump Cat Mining</title>
-    <script src="https://sad.adsgram.ai/js/adsgram-ad-sdk.js"></script>
-    <style>
-        :root {
-            --bg: #0f172a;
-            --card: #1e293b;
-            --accent: #f97316;
-            --green: #22c55e;
-        }
-
-        body {
-            background-color: var(--bg);
-            color: white;
-            font-family: system-ui, -apple-system, sans-serif;
-            margin: 0; padding: 0;
-            display: flex; flex-direction: column; height: 100vh;
-            overflow: hidden;
-        }
-
-        /* Header */
-        .header {
-            padding: 20px;
-            background: rgba(0,0,0,0.3);
-            display: flex; justify-content: space-between; align-items: center;
-            border-bottom: 1px solid #334155;
-        }
-
-        .balance { color: #facc15; font-size: 22px; font-weight: 900; }
-
-        /* Battery Grid (24 Cells) */
-        .grid-container {
-            padding: 20px;
-            flex-grow: 1;
-            display: flex; flex-direction: column; align-items: center;
-        }
-
-        .matrix {
-            display: grid;
-            grid-template-columns: repeat(8, 1fr);
-            gap: 8px;
-            background: #020617;
-            padding: 15px;
-            border-radius: 15px;
-            width: 90%;
-            margin: 20px 0;
-        }
-
-        .cell {
-            height: 40px;
-            background: #1e293b;
-            border: 1px solid #334155;
-            border-radius: 6px;
-        }
-
-        .cell.active {
-            background: linear-gradient(to top, #16a34a, #4ade80);
-            box-shadow: 0 0 8px #22c55e;
-        }
-
-        /* Buttons */
-        .btn-ad {
-            background: linear-gradient(135deg, #f97316, #ea580c);
-            color: white; border: none;
-            padding: 18px 40px;
-            border-radius: 50px;
-            font-size: 18px; font-weight: bold;
-            cursor: pointer;
-            width: 80%;
-            box-shadow: 0 4px 15px rgba(234, 88, 12, 0.4);
-        }
-
-        .btn-ad:disabled { opacity: 0.5; cursor: not-allowed; }
-
-        /* Navigation */
-        .nav {
-            height: 70px;
-            background: #020617;
-            display: flex; justify-content: space-around; align-items: center;
-            border-top: 1px solid #334155;
-        }
-    </style>
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <script src="https://adsgram.ai/js-sdk/direct-link.js"></script>
 </head>
 <body>
-
-    <div class="header">
-        <div>
-            <div style="font-weight: 900; font-size: 14px;">Jump Cat Bot</div>
-            <div style="font-size: 10px; color: #94a3b8;">Status: Active</div>
-        </div>
-        <div id="balance" class="balance">0.00000000</div>
-    </div>
-
-    <div class="grid-container">
-        <div style="color: #38bdf8; font-size: 12px; font-weight: bold;">🔋 طاقة البطاريات: <span id="pwr-text">0</span>/24</div>
-        <div id="grid" class="matrix"></div>
-        <button id="adBtn" onclick="watchAd()" class="btn-ad">🎬 شحن طاقة (إعلان)</button>
-        <p id="msg" style="font-size: 12px; margin-top: 15px; color: #94a3b8;"></p>
-    </div>
-
-    <div class="nav">
-        <span>📊</span>
-        <span>📋</span>
-        <span>👥</span>
-        <span>👛</span>
-    </div>
+    <h2>شاهد الإعلان للحصول على الرصيد</h2>
+    <button id="watchAd">اضغط هنا لمشاهدة الإعلان</button>
 
     <script>
-        // البيانات المستخرجة من صورتك
-        const BLOCK_ID = "19316"; 
-        
-        let coins = parseFloat(localStorage.getItem('cat_coins')) || 0;
-        let power = parseInt(localStorage.getItem('cat_pwr')) || 0;
+        const tg = window.Telegram.WebApp;
+        tg.expand(); // فتح الشاشة بالكامل
 
-        function refresh() {
-            document.getElementById('balance').innerText = coins.toFixed(8);
-            document.getElementById('pwr-text').innerText = power;
-            
-            const grid = document.getElementById('grid');
-            grid.innerHTML = '';
-            for(let i=0; i<24; i++) {
-                const cell = document.createElement('div');
-                cell.className = 'cell' + (i < power ? ' active' : '');
-                grid.appendChild(cell);
-            }
-            
-            localStorage.setItem('cat_coins', coins);
-            localStorage.setItem('cat_pwr', power);
-        }
+        const AdController = window.Adsgram.init({ blockId: "19316" }); // Block ID الخاص بك
 
-        // التعدين التلقائي
-        setInterval(() => {
-            if(power > 0) {
-                coins += 0.00000005;
-                refresh();
-            }
-        }, 1000);
-
-        // وظيفة الإعلان المباشرة
-        function watchAd() {
-            const btn = document.getElementById('adBtn');
-            const msg = document.getElementById('msg');
-            
-            btn.disabled = true;
-            msg.innerText = "جاري الاتصال بسيرفر الإعلانات...";
-
-            if (window.Adsgram) {
-                const AdController = window.Adsgram.init({ blockId: BLOCK_ID });
-                
-                AdController.show().then((result) => {
-                    if(power < 24) {
-                        power++;
-                        refresh();
-                        msg.style.color = "#22c55e";
-                        msg.innerText = "✅ تم شحن البطارية بنجاح!";
-                    }
-                    btn.disabled = false;
-                }).catch((err) => {
-                    console.error(err);
-                    msg.style.color = "#f87171";
-                    msg.innerText = "❌ تعذر الإعلان: " + (err.description || "تأكد من فتح البوت من تليجرام");
-                    btn.disabled = false;
-                });
-            } else {
-                msg.innerText = "⚠️ لم يتم تحميل نظام الإعلانات بعد، انتظر لحظة.";
-                btn.disabled = false;
-            }
-        }
-
-        window.onload = refresh;
+        document.getElementById('watchAd').onclick = function() {
+            AdController.show().then((result) => {
+                // عند انتهاء الإعلان بنجاح
+                tg.sendData("ad_watched_successfully");
+                tg.close(); // إغلاق الصفحة والعودة للبوت
+            }).catch((result) => {
+                // في حال إلغاء الإعلان أو حدوث خطأ
+                alert("يجب مشاهدة الإعلان كاملاً للحصول على المكافأة");
+            });
+        };
     </script>
 </body>
 </html>
