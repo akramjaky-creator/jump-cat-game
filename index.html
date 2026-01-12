@@ -3,213 +3,175 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>bitTycoon Pro</title>
+    <title>Jump Cat Mining</title>
     <script src="https://sad.adsgram.ai/js/adsgram-ad-sdk.js"></script>
     <style>
         :root {
-            --bg-color: #161d2d;
-            --card-bg: #1f283d;
-            --primary-orange: #f97316;
-            --ton-blue: #0ea5e9;
-            --energy-green: #22c55e;
-            --text-gray: #94a3b8;
+            --bg: #0f172a;
+            --card: #1e293b;
+            --accent: #f97316;
+            --green: #22c55e;
         }
 
         body {
-            background: radial-gradient(circle at top, #1e293b 0%, #0f172a 100%);
+            background-color: var(--bg);
             color: white;
-            font-family: 'Segoe UI', Tahoma, sans-serif;
+            font-family: system-ui, -apple-system, sans-serif;
             margin: 0; padding: 0;
+            display: flex; flex-direction: column; height: 100vh;
             overflow: hidden;
-            height: 100vh;
-            user-select: none;
         }
 
         /* Header */
         .header {
+            padding: 20px;
+            background: rgba(0,0,0,0.3);
             display: flex; justify-content: space-between; align-items: center;
-            padding: 15px 20px; border-bottom: 1px solid rgba(255,255,255,0.05);
-            background: rgba(0,0,0,0.2);
+            border-bottom: 1px solid #334155;
         }
-        .logo-box {
-            width: 38px; height: 38px; background: var(--energy-green);
-            border-radius: 10px; display: flex; align-items: center;
-            justify-content: center; color: black; font-weight: 900; font-size: 20px;
-            box-shadow: 0 0 15px rgba(34, 197, 94, 0.3);
+
+        .balance { color: #facc15; font-size: 22px; font-weight: 900; }
+
+        /* Battery Grid (24 Cells) */
+        .grid-container {
+            padding: 20px;
+            flex-grow: 1;
+            display: flex; flex-direction: column; align-items: center;
         }
-        .balance-text { color: #facc15; font-weight: bold; font-size: 17px; margin: 0; }
 
-        /* Pages */
-        .container { height: calc(100vh - 145px); overflow-y: auto; padding: 20px; }
-        .page { display: none; }
-        .page.active { display: block; }
-
-        /* Battery Matrix */
-        .energy-label { text-align: center; color: var(--ton-blue); font-size: 11px; font-weight: 900; margin-bottom: 15px; letter-spacing: 1px; }
         .matrix {
-            display: grid; grid-template-columns: repeat(8, 1fr); gap: 7px;
-            background: rgba(0,0,0,0.3); padding: 15px; border-radius: 20px;
-            border: 1px solid rgba(255,255,255,0.05); margin-bottom: 30px;
+            display: grid;
+            grid-template-columns: repeat(8, 1fr);
+            gap: 8px;
+            background: #020617;
+            padding: 15px;
+            border-radius: 15px;
+            width: 90%;
+            margin: 20px 0;
         }
-        .cell { height: 45px; background: #0d111a; border: 1px solid #2d3748; border-radius: 7px; position: relative; overflow: hidden; }
-        .fill {
-            position: absolute; bottom: 0; width: 100%; height: 100%;
-            background: linear-gradient(180deg, #4ade80 0%, #16a34a 100%);
-            box-shadow: 0 0 12px rgba(34, 197, 94, 0.6);
+
+        .cell {
+            height: 40px;
+            background: #1e293b;
+            border: 1px solid #334155;
+            border-radius: 6px;
+        }
+
+        .cell.active {
+            background: linear-gradient(to top, #16a34a, #4ade80);
+            box-shadow: 0 0 8px #22c55e;
         }
 
         /* Buttons */
-        .btn-main {
-            background: linear-gradient(180deg, #fb923c 0%, #f97316 100%);
-            color: black; border: none; width: 100%; padding: 16px;
-            border-radius: 50px; font-weight: 900; font-size: 14px;
-            text-transform: uppercase; cursor: pointer; box-shadow: 0 4px 15px rgba(249, 115, 22, 0.3);
+        .btn-ad {
+            background: linear-gradient(135deg, #f97316, #ea580c);
+            color: white; border: none;
+            padding: 18px 40px;
+            border-radius: 50px;
+            font-size: 18px; font-weight: bold;
+            cursor: pointer;
+            width: 80%;
+            box-shadow: 0 4px 15px rgba(234, 88, 12, 0.4);
         }
 
-        /* Nav Bar */
+        .btn-ad:disabled { opacity: 0.5; cursor: not-allowed; }
+
+        /* Navigation */
         .nav {
-            position: fixed; bottom: 0; left: 0; right: 0;
-            background: #0d1117; height: 75px; display: flex;
-            justify-content: space-around; align-items: center;
-            border-top: 1px solid #2d3748; padding-bottom: 10px;
+            height: 70px;
+            background: #020617;
+            display: flex; justify-content: space-around; align-items: center;
+            border-top: 1px solid #334155;
         }
-        .nav-item { color: #64748b; text-align: center; font-size: 10px; font-weight: bold; cursor: pointer; }
-        .nav-item.active { color: white; }
-        .nav-item span { display: block; font-size: 22px; margin-bottom: 4px; }
-
-        /* Utility */
-        .card { background: var(--card-bg); border-radius: 20px; padding: 15px; margin-bottom: 15px; border: 1px solid rgba(255,255,255,0.03); }
     </style>
 </head>
 <body>
 
     <div class="header">
-        <div style="display: flex; align-items: center; gap: 10px;">
-            <div class="logo-box">B</div>
-            <div>
-                <div style="font-weight: 900; font-size: 13px;">bitTycoon</div>
-                <div style="font-size: 9px; color: var(--text-gray);">ID: 2708945</div>
-            </div>
+        <div>
+            <div style="font-weight: 900; font-size: 14px;">Jump Cat Bot</div>
+            <div style="font-size: 10px; color: #94a3b8;">Status: Active</div>
         </div>
-        <div style="text-align: right;">
-            <p id="top-bal" class="balance-text">0.00000000</p>
-            <p style="font-size: 8px; color: var(--text-gray); font-weight: bold; margin: 0;">TON BALANCE</p>
-        </div>
+        <div id="balance" class="balance">0.00000000</div>
     </div>
 
-    <div class="container">
-        <div id="p-dash" class="page active">
-            <div class="energy-label">🔋 ENERGY MATRIX: <span id="batt-count">0</span>/24</div>
-            <div id="matrix-grid" class="matrix"></div>
-            <button onclick="nav('contracts')" class="btn-main">Mining Contract</button>
-        </div>
-
-        <div id="p-contracts" class="page">
-            <p style="font-size: 10px; font-weight: 900; color: var(--text-gray); margin-bottom: 15px;">FREE ENERGY</p>
-            <div class="card" style="display: flex; justify-content: space-between; align-items: center;">
-                <div style="display: flex; align-items: center; gap: 12px;">
-                    <span style="font-size: 25px;">🎬</span>
-                    <div>
-                        <div style="font-weight: 900; font-size: 13px;">Watch Ads</div>
-                        <div style="font-size: 9px; color: var(--text-gray);">+1 Battery Unit</div>
-                    </div>
-                </div>
-                <button onclick="runAd()" id="adBtn" style="background: #fbbf24; border: none; padding: 8px 18px; border-radius: 10px; font-weight: 900; font-size: 10px; color: black;">START</button>
-            </div>
-        </div>
-
-        <div id="p-ref" class="page" style="text-align: center;">
-            <h2 style="font-weight: 900; margin-top: 20px;">Referral</h2>
-            <div class="card" style="margin-top: 30px; padding: 30px;">
-                <p style="font-size: 10px; color: var(--text-gray); font-weight: 900;">INVITATION CODE</p>
-                <p style="font-size: 32px; font-weight: 900; color: var(--ton-blue); margin: 15px 0;">41014646</p>
-            </div>
-            <button class="btn-main" style="background: var(--energy-green);">Invite Friends</button>
-        </div>
-
-        <div id="p-wallet" class="page">
-            <div class="card" style="background: var(--ton-blue); color: white; padding: 30px; border: none;">
-                <p style="font-size: 12px; font-weight: bold; opacity: 0.9;">Total Balance</p>
-                <p id="wall-bal" style="font-size: 28px; font-weight: 900; margin: 15px 0;">0.00000000</p>
-                <button onclick="alert('Withdraw logic here')" style="background: white; color: var(--ton-blue); border: none; padding: 10px 20px; border-radius: 12px; font-weight: 900; font-size: 10px;">WITHDRAW</button>
-            </div>
-            <p style="font-size: 9px; color: var(--text-gray); text-align: center; font-weight: bold; margin-top: 20px;">TNNFBZEbTgU1q2xKhVBC8CwrbzCmEL3bpX</p>
-        </div>
+    <div class="grid-container">
+        <div style="color: #38bdf8; font-size: 12px; font-weight: bold;">🔋 طاقة البطاريات: <span id="pwr-text">0</span>/24</div>
+        <div id="grid" class="matrix"></div>
+        <button id="adBtn" onclick="watchAd()" class="btn-ad">🎬 شحن طاقة (إعلان)</button>
+        <p id="msg" style="font-size: 12px; margin-top: 15px; color: #94a3b8;"></p>
     </div>
 
     <div class="nav">
-        <div onclick="nav('dash')" id="n-dash" class="nav-item active"><span>📊</span>DASHBOARD</div>
-        <div onclick="nav('contracts')" id="n-contracts" class="nav-item"><span>📋</span>CONTRACTS</div>
-        <div onclick="nav('ref')" id="n-ref" class="nav-item"><span>👥</span>REFERRAL</div>
-        <div onclick="nav('wallet')" id="n-wallet" class="nav-item"><span>👛</span>WALLET</div>
+        <span>📊</span>
+        <span>📋</span>
+        <span>👥</span>
+        <span>👛</span>
     </div>
 
     <script>
-        let balance = parseFloat(localStorage.getItem('bt_bal')) || 0;
-        let battery = parseInt(localStorage.getItem('bt_pwr')) || 0;
-        const PLATFORM_ID = "19316";
+        // البيانات المستخرجة من صورتك
+        const BLOCK_ID = "19316"; 
+        
+        let coins = parseFloat(localStorage.getItem('cat_coins')) || 0;
+        let power = parseInt(localStorage.getItem('cat_pwr')) || 0;
 
-        function update() {
-            document.getElementById('top-bal').innerText = balance.toFixed(8);
-            document.getElementById('wall-bal').innerText = balance.toFixed(8);
-            document.getElementById('batt-count').innerText = battery;
+        function refresh() {
+            document.getElementById('balance').innerText = coins.toFixed(8);
+            document.getElementById('pwr-text').innerText = power;
             
-            const grid = document.getElementById('matrix-grid');
+            const grid = document.getElementById('grid');
             grid.innerHTML = '';
             for(let i=0; i<24; i++) {
                 const cell = document.createElement('div');
-                cell.className = 'cell';
-                if(i < battery) cell.innerHTML = '<div class="fill"></div>';
+                cell.className = 'cell' + (i < power ? ' active' : '');
                 grid.appendChild(cell);
             }
-            localStorage.setItem('bt_bal', balance);
-            localStorage.setItem('bt_pwr', battery);
+            
+            localStorage.setItem('cat_coins', coins);
+            localStorage.setItem('cat_pwr', power);
         }
 
-        // التعدين
-        setInterval(() => { if(battery > 0) { balance += 0.00000005; update(); } }, 1000);
-        // استهلاك الطاقة
-        setInterval(() => { if(battery > 0) { battery--; update(); } }, 300000);
+        // التعدين التلقائي
+        setInterval(() => {
+            if(power > 0) {
+                coins += 0.00000005;
+                refresh();
+            }
+        }, 1000);
 
-        function nav(id) {
-            document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
-            document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
-            document.getElementById('p-' + id).classList.add('active');
-            document.getElementById('n-' + id).classList.add('active');
-        }
-
-        // نظام الإعلانات المدمج
-        function runAd() {
+        // وظيفة الإعلان المباشرة
+        function watchAd() {
             const btn = document.getElementById('adBtn');
+            const msg = document.getElementById('msg');
+            
             btn.disabled = true;
-            btn.innerText = "WAIT...";
+            msg.innerText = "جاري الاتصال بسيرفر الإعلانات...";
 
             if (window.Adsgram) {
-                const AdController = window.Adsgram.init({ blockId: PLATFORM_ID });
+                const AdController = window.Adsgram.init({ blockId: BLOCK_ID });
                 
-                AdController.show().then(() => {
-                    if(battery < 24) {
-                        battery++;
-                        update();
-                        alert("✅ Success: +1 Battery Unit!");
+                AdController.show().then((result) => {
+                    if(power < 24) {
+                        power++;
+                        refresh();
+                        msg.style.color = "#22c55e";
+                        msg.innerText = "✅ تم شحن البطارية بنجاح!";
                     }
                     btn.disabled = false;
-                    btn.innerText = "START";
-                }).catch((error) => {
+                }).catch((err) => {
+                    console.error(err);
+                    msg.style.color = "#f87171";
+                    msg.innerText = "❌ تعذر الإعلان: " + (err.description || "تأكد من فتح البوت من تليجرام");
                     btn.disabled = false;
-                    btn.innerText = "START";
-                    // تنبيه ذكي لمعرفة سبب عدم ظهور الإعلان
-                    if (error.state === 'not_found') alert("No ads available for your region.");
-                    else alert("Ad failed. Please open the bot from Telegram.");
                 });
             } else {
-                alert("Ad system loading... Please try again.");
+                msg.innerText = "⚠️ لم يتم تحميل نظام الإعلانات بعد، انتظر لحظة.";
                 btn.disabled = false;
-                btn.innerText = "START";
             }
         }
 
-        window.onload = update;
+        window.onload = refresh;
     </script>
 </body>
 </html>
