@@ -5,23 +5,17 @@
     <script src="https://adsgram.ai/js-sdk/direct-link.js"></script>
 </head>
 <body>
-    <h2>شاهد الإعلان للحصول على الرصيد</h2>
-    <button id="watchAd">اضغط هنا لمشاهدة الإعلان</button>
-
+    <button id="watchAd" style="padding: 20px; background: blue; color: white;">اضغط لمشاهدة الإعلان</button>
     <script>
         const tg = window.Telegram.WebApp;
-        tg.expand(); // فتح الشاشة بالكامل
-
-        const AdController = window.Adsgram.init({ blockId: "19316" }); // Block ID الخاص بك
+        const AdController = window.Adsgram.init({ blockId: "19316" });
 
         document.getElementById('watchAd').onclick = function() {
-            AdController.show().then((result) => {
-                // عند انتهاء الإعلان بنجاح
+            AdController.show().then(() => {
                 tg.sendData("ad_watched_successfully");
-                tg.close(); // إغلاق الصفحة والعودة للبوت
-            }).catch((result) => {
-                // في حال إلغاء الإعلان أو حدوث خطأ
-                alert("يجب مشاهدة الإعلان كاملاً للحصول على المكافأة");
+                tg.close();
+            }).catch(() => {
+                alert("اكمل المشاهدة للحصول على المكافأة");
             });
         };
     </script>
