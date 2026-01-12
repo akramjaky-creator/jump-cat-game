@@ -2,89 +2,88 @@
 <html lang="ar" dir="rtl">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>شحن الطاقة - bitTycoon</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Ads Mining</title>
     <script src="https://sad.adsgram.ai/js/adsgram-ad-sdk.js"></script>
     <style>
         body {
-            background-color: #161d2d;
+            background-color: #0f172a;
             color: white;
-            font-family: sans-serif;
+            font-family: system-ui, -apple-system, sans-serif;
             display: flex;
             flex-direction: column;
             align-items: center;
             justify-content: center;
             height: 100vh;
             margin: 0;
-        }
-        .container {
             text-align: center;
-            padding: 20px;
-            border: 1px solid #2d3748;
-            border-radius: 15px;
-            background-color: #1f283d;
         }
-        .energy-val {
-            font-size: 24px;
-            font-weight: bold;
-            color: #22c55e;
-            margin-bottom: 20px;
+        .ad-card {
+            background: #1e293b;
+            padding: 30px;
+            border-radius: 20px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.3);
+            width: 85%;
+            max-width: 400px;
         }
-        button {
-            background-color: #f97316;
-            color: black;
+        .btn-play {
+            background: linear-gradient(135deg, #f97316 0%, #ed6300 100%);
+            color: white;
             border: none;
-            padding: 15px 30px;
+            padding: 15px 40px;
             font-size: 18px;
             font-weight: bold;
-            border-radius: 50px;
+            border-radius: 12px;
             cursor: pointer;
+            width: 100%;
+            transition: transform 0.2s;
         }
-        button:disabled {
-            background-color: #4b5563;
-        }
+        .btn-play:active { transform: scale(0.95); }
+        .status { margin-top: 15px; color: #94a3b8; font-size: 14px; }
     </style>
 </head>
 <body>
 
-    <div class="container">
-        <h2>نظام شحن الطاقة</h2>
-        <div class="energy-val">البطاريات: <span id="count">0</span> / 24</div>
-        <button id="adBtn" onclick="showMyAd()">🎬 مشاهدة إعلان لشحن +1</button>
+    <div class="ad-card">
+        <div style="font-size: 50px; margin-bottom: 10px;">📺</div>
+        <h2 style="margin: 0 0 10px 0;">شحن طاقة التعدين</h2>
+        <p style="color: #cbd5e1; font-size: 14px; margin-bottom: 25px;">شاهد إعلان فيديو قصير للحصول على طاقة إضافية مجانية.</p>
+        
+        <button class="btn-play" onclick="showAd()">مشاهدة الإعلان</button>
+        
+        <div id="statusLabel" class="status">جاهز للتشغيل</div>
     </div>
 
     <script>
-        // حفظ واسترجاع عدد البطاريات من ذاكرة الهاتف
-        let batteryCount = parseInt(localStorage.getItem('user_energy')) || 0;
-        document.getElementById('count').innerText = batteryCount;
+        // الـ ID الخاص بمنصتك من صورة Adsgram التي أرفقتها
+        const PLATFORM_ID = "19316"; 
 
-        function showMyAd() {
-            const btn = document.getElementById('adBtn');
-            btn.disabled = true;
-            btn.innerText = "جاري التحميل...";
+        function showAd() {
+            const label = document.getElementById('statusLabel');
+            label.innerText = "جاري الاتصال بنظام الإعلانات...";
+            label.style.color = "#fbbf24";
 
-            // تهيئة الإعلان بالـ ID الخاص بك 19316
-            const AdController = window.Adsgram.init({ blockId: "19316" });
+            // التأكد من أن السكريبت محمل
+            if (window.Adsgram) {
+                const AdController = window.Adsgram.init({ blockId: PLATFORM_ID });
 
-            AdController.show().then(() => {
-                // في حال شاهد المستخدم الإعلان كاملاً
-                if (batteryCount < 24) {
-                    batteryCount++;
-                    document.getElementById('count').innerText = batteryCount;
-                    localStorage.setItem('user_energy', batteryCount);
-                    alert("✅ تم شحن بطارية واحدة بنجاح!");
-                } else {
-                    alert("البطاريات ممتلئة!");
-                }
-                btn.disabled = false;
-                btn.innerText = "🎬 مشاهدة إعلان لشحن +1";
-            }).catch((error) => {
-                // في حال حدث خطأ أو أغلق المستخدم الإعلان
-                console.error(error);
-                alert("تعذر تحميل الإعلان، تأكد من أنك تفتح البوت من تليجرام.");
-                btn.disabled = false;
-                btn.innerText = "🎬 مشاهدة إعلان لشحن +1";
-            });
+                AdController.show()
+                .then((result) => {
+                    // المستخدم شاهد الإعلان كاملاً
+                    label.innerText = "✅ تم بنجاح! طاقة مضافة.";
+                    label.style.color = "#22c55e";
+                    console.log("Ad result:", result);
+                })
+                .catch((error) => {
+                    // خطأ في الإعلان أو إغلاقه مبكراً
+                    label.innerText = "❌ لم يكتمل الإعلان. حاول ثانية.";
+                    label.style.color = "#f87171";
+                    console.error("Ad Error:", error);
+                });
+            } else {
+                label.innerText = "⚠️ لم يتم تحميل نظام الإعلانات بعد.";
+                label.style.color = "#f87171";
+            }
         }
     </script>
 </body>
